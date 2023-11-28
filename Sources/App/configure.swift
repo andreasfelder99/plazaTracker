@@ -7,8 +7,10 @@ import Vapor
 // configures your application
 public func configure(_ app: Application) async throws {
     // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    app.middleware.use(app.sessions.middleware)
+    app.middleware.use(User.sessionAuthenticator())
+    
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",
         port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
@@ -19,7 +21,11 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
 
     app.views.use(.leaf)
+    
     app.migrations.add(CreateClubNight())
+    app.migrations.add(User.Migration())
+    app.migrations.add(UserToken.Migration())
+    
     app.logger.logLevel = .debug
     
     try app.autoMigrate().wait()
