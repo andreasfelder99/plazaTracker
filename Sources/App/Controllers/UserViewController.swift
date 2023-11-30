@@ -59,6 +59,13 @@ extension User {
     }
 }
 
+extension User {
+    struct displayUser: Content {
+        var name: String
+        var email: String
+    }
+}
+
 extension User.Create: Validatable {
     static func validations(_ validations: inout Validations) {
         validations.add("name", as: String.self, is: !.empty)

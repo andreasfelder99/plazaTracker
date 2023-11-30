@@ -27,6 +27,7 @@ final class ClubNight: Model {
     @Field(key: "totalGuests")
     var totalGuests: Int
     
+    
     init() {}
     
     init(id: UUID? = nil, date: String, eventName: String, isActive: Bool, totalGuests: Int) {

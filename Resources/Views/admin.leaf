@@ -1,0 +1,63 @@
+#extend("base"):
+#export("content"):
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Willkommen, #(username)</h1>
+    
+    <div class="row">
+        <!-- Panel: Current Event -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Aktuelles Event</div>
+                <div class="card-body">
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Panel: Old Events -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Vergangene Events</div>
+                <div class="card-body">
+                    #if(count(clubNights) == 0):
+                    <p>Keine alten Events</p>
+                    #else:
+                    <div class="list-group list-group-flush overflow-auto" style="max-height: 300px;">
+                        #for(clubnight in clubNights):
+                        <div class="list-group-item align-items-start">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="fw-bold">
+                                        <a href="admin/#(clubnight.id)/" class="list-group-item list-group-item-action">#(clubnight.eventName), #(clubnight.date)</a>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <form class="form-inline" action="/api/clubnights/#(clubnight.id)/activate" method="get">
+                                        <input class="btn btn-outline-warning" type="submit" value="Aktivieren">
+                                    </form>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-primary rounded-pill">#(clubnight.totalGuests)</span>
+                                </div>
+                            </div>
+                        </div>
+                        #endfor
+                    </div>
+                    #endif
+                </div>
+            </div>
+            
+            <!-- Panel: Statistics -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header">Statistics</div>
+                    <div class="card-body">
+                        <h1>Total clubNights: #count(clubNights)</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    #endexport
+    #endextend
