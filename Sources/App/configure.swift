@@ -35,4 +35,5 @@ public func configure(_ app: Application) async throws {
     app.leaf.tags["QRTag"] = QRTag()
     // register routes
     try routes(app)
+    
 }

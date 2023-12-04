@@ -93,6 +93,8 @@ struct AdminViewController: RouteCollection {
                     setAllOtherNightsToDisabled(req, id: updatedClubNight.id ?? UUID())
                 }
                 
+                clubNight.update(on: req.db)
+                
                 // Redirect to /admin after updating the club night
                 return req.eventLoop.future(req.redirect(to: "/admin"))
             }

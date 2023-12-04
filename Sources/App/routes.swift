@@ -10,4 +10,7 @@ func routes(_ app: Application) throws {
     
     let clubNightController = AdminViewController()
     try app.register(collection: clubNightController)
+    
+    let webSocketController = WebSocketHandler()
+    try app.register(collection: webSocketController)
 }

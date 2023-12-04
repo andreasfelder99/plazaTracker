@@ -1,7 +1,7 @@
 #extend("base"):
 #export("content"):
 <div class="counter-container">
-    <div class="counter-value" id="counterDisplay">0</div>
+    <div class="counter-value" id="counterDisplay"></div>
     <div class="counter-buttons">
         <button class="btn btn-success btn-increase" onclick="sendMessage('increase')">Increase</button>
         <button class="btn btn-danger btn-decrease" onclick="sendMessage('decrease')">Decrease</button>
@@ -10,24 +10,31 @@
 
 
 <script>
-    const socket = new WebSocket('ws://localhost:8080/counter');
-    
+    const socket = new WebSocket('#(webSocketURL)');
+
     socket.onopen = (event) => {
         console.log('WebSocket connection opened:', event);
     };
-    
+
     socket.onmessage = (event) => {
-        console.log('WebSocket message received:', event.data);
-    };
-    
+            console.log('WebSocket message received:', event.data);
+
+            const data = JSON.parse(event.data);
+            const currentGuests = data.currentClubNight.currentGuests;
+            const totalGuests = data.currentClubNight.totalGuests;
+
+            // Update the counter value in the DOM
+            document.getElementById('counterDisplay').innerText = `${currentGuests}/${totalGuests}`;
+        };
+
     socket.onclose = (event) => {
         console.log('WebSocket connection closed:', event);
     };
-    
+
     socket.onerror = (error) => {
         console.error('WebSocket error:', error);
     };
-    
+
     function sendMessage(message) {
         socket.send(message);
     }
