@@ -8,6 +8,6 @@ func routes(_ app: Application) throws {
     let userViewController = UserViewController()
     try app.register(collection: userViewController)
     
-    let clubNightController = adminViewController()
+    let clubNightController = AdminViewController()
     try app.register(collection: clubNightController)
 }

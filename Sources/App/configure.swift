@@ -6,7 +6,6 @@ import Vapor
 
 // configures your application
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     app.middleware.use(app.sessions.middleware)
     app.middleware.use(User.sessionAuthenticator())
@@ -25,12 +24,15 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateClubNight())
     app.migrations.add(User.Migration())
     app.migrations.add(UserToken.Migration())
+    app.migrations.add(ClubNightUpdateMigration())
+    app.migrations.add(ClubNightUpdateCurrentGuestsMigration())
     
     app.logger.logLevel = .debug
     
     try app.autoMigrate().wait()
     
-
+    //register custom tags
+    app.leaf.tags["QRTag"] = QRTag()
     // register routes
     try routes(app)
 }

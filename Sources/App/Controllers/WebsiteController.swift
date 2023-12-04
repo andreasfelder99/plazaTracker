@@ -1,13 +1,13 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Andi Felder on 21.11.2023.
 //
 
 import Foundation
-import Vapor
 import Leaf
+import Vapor
 
 struct WebsiteController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
@@ -19,10 +19,12 @@ struct WebsiteController: RouteCollection {
         credentialsAuthRoutes.post("login", use: loginPostHandler)
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("admin", use: adminViewController().index)
+        protectedRoutes.get("admin", use: AdminViewController().index)
+        protectedRoutes.get("counter", use: CounterViewController().index)
         
         authSessionsRoutes.get(use: index)
     }
+
     func index(req: Request) -> EventLoopFuture<View> {
         var indexContent = IndexContext(title: "Welcome", isLoggedIn: false, username: "", email: "")
         if let user = req.auth.get(User.self) {
@@ -33,7 +35,7 @@ struct WebsiteController: RouteCollection {
         return req.view.render("index", indexContent)
     }
     
-    func loginHandler(_ req: Request) -> EventLoopFuture<View>{
+    func loginHandler(_ req: Request) -> EventLoopFuture<View> {
         let context: LoginContext
         
         if let error = req.query[Bool.self, at: "error"], error {
@@ -46,7 +48,7 @@ struct WebsiteController: RouteCollection {
     }
     
     func loginPostHandler(_ req: Request) -> EventLoopFuture<Response> {
-        if req.auth.has(User.self){
+        if req.auth.has(User.self) {
             return req.eventLoop.future(req.redirect(to: "/"))
         } else {
             let context = LoginContext(loginError: true)
@@ -65,7 +67,7 @@ struct WebsiteController: RouteCollection {
 
 struct IndexContext: Encodable {
     var title: String
-    var isLoggedIn : Bool
+    var isLoggedIn: Bool
     var username: String
     var email: String
 }
@@ -74,7 +76,7 @@ struct LoginContext: Encodable {
     let title = "logging in.."
     let loginError: Bool
     
-    init(loginError: Bool = false){
+    init(loginError: Bool = false) {
         self.loginError = loginError
     }
 }

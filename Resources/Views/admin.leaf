@@ -3,14 +3,57 @@
 
 <div class="container mt-4">
     <h1 class="text-center mb-4">Willkommen, #(username)</h1>
-    
+    <div class="row">
+        <h1> Aktives Event: #(currentClubNight.eventName)</h1>
+    </div>
+    <div class="row">
+        <div clas="container">
+            <div class="row justify-content-md-center">
+                <div class="col">
+                  <h1> Maximale Auslastung: #(currentClubNight.totalGuests)</h1>
+                </div>
+                <div class="col">
+                  <h1> Aktuelle Auslastung: #(currentClubNight.currentGuests)</h1>
+                </div>
+                <div class="col">
+                    <h1>QR Code: </h1>#QRTag((currentClubNight.id))
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Link kopieren</button>
+                </div>
+              </div>
+        </div>
+    </div>
+    <div class="row">
+        
+    </div>
     <div class="row">
         <!-- Panel: Current Event -->
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">Aktuelles Event</div>
+                <div class="card-header">Neues Event starten</div>
                 <div class="card-body">
-                    
+                    <form class="container" style="max-width: 400px;" method="post" id="newClubNightForm" action="/admin/new">
+                                <div class="mb-3">
+                                    <label for="eventName" class="form-label">Event Name</label>
+                                    <input type="text" class="form-control" id="eventName" name="eventName">
+                                    <div id="eventNameHelp" class="form-text"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="date" class="form-label">Datum</label>
+                                    <input type="text" id="datepicker" class="form-control" placeholder="Wählen.." autocomplete="off" name="date">
+                                </div>
+                                <div class="mb-3">
+                                        <label for="totalGuests" class="form-label">Maximale Anzahl Gäste</label>
+                                        <input type="number" class="form-control" id="totalGuests" name="totalGuests">
+                                        <div id="totalGuestsHelp" class="form-text"></div>
+                                </div>
+                                <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">
+                                        <label class="form-check-label" for="isActiveCheckbox">Session aktivieren></label>
+                                </div>
+                        <button type="submit" class="btn btn-primary">Bestätigen</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -18,10 +61,10 @@
         <!-- Panel: Old Events -->
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header">Vergangene Events</div>
+                <div class="card-header">Events</div>
                 <div class="card-body">
                     #if(count(clubNights) == 0):
-                    <p>Keine alten Events</p>
+                    <p>Keine Events</p>
                     #else:
                     <div class="list-group list-group-flush overflow-auto" style="max-height: 300px;">
                         #for(clubnight in clubNights):
@@ -32,14 +75,25 @@
                                         <a href="admin/#(clubnight.id)/" class="list-group-item list-group-item-action">#(clubnight.eventName), #(clubnight.date)</a>
                                     </div>
                                 </div>
+                                #if(!clubnight.isActive):
                                 <div class="col-auto">
-                                    <form class="form-inline" action="/api/clubnights/#(clubnight.id)/activate" method="get">
+                                    <form class="form-inline" action="/api/clubnights/#(clubnight.id)/activate" method="post">
                                         <input class="btn btn-outline-warning" type="submit" value="Aktivieren">
                                     </form>
                                 </div>
                                 <div class="col-auto">
                                     <span class="badge bg-primary rounded-pill">#(clubnight.totalGuests)</span>
                                 </div>
+                                #else:
+                                <div class="col-auto">
+                                <button type="button" class="btn btn-primary position-relative">
+                                  Aktive Nacht
+                                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    #(clubnight.totalGuests)
+                                  </span>
+                                </button>
+                                </div>
+                                #endif
                             </div>
                         </div>
                         #endfor
@@ -59,5 +113,33 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        $(document).ready(function () {
+            $('#datepicker').datepicker({
+                format: 'dd.mm.yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'de'
+            });
+        });
+        document.getElementById('clubNightForm').addEventListener('submit', function () {
+                // Add a hidden input with the name isActive and value false if the checkbox is not checked
+                if (!document.getElementById('isActiveCheckbox').checked) {
+                    var hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'isActive';
+                    hiddenInput.value = 'false';
+                    this.appendChild(hiddenInput);
+                }
+            });
+        function copyToClipboard() {
+            var part1 = "/session/"
+          navigator.clipboard.writeText(part1 + '#(currentClubNight.id)').then(function(x) {
+              alert("Link wurde kopiert!");
+            });
+        }
+            
+    </script>
     #endexport
     #endextend

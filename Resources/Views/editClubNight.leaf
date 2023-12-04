@@ -1,38 +1,37 @@
 #extend("base"):
 #export("content"):
-<h1>Bearbeitung von #(selectedClubNight.eventName)</h1>
-<form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
-            <div class="mb-3">
-                <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" name="eventName">
-                <div id="eventNameHelp" class="form-text">Bearbeite den Namen des Events</div>
-            </div>
-            <div class="mb-3">
-                <label for="date" class="form-label">Wähle ein Datum:</label>
-                <input type="text" id="datepicker" class="form-control" placeholder="Datum..." autocomplete="off" name="date">
-            </div>
-            <div class="mb-3">
-                    <label for="totalGuests" class="form-label">Maximale Anzahl Gäste</label>
-                    <input type="number" class="form-control" id="totalGuests" name="totalGuests">
-                    <div id="totalGuestsHelp" class="form-text">Bearbeite die Maximale Anzahl Gäste</div>
-            </div>
-            <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">
-                    <label class="form-check-label" for="isActiveCheckbox">Is Active</label>
-            </div>
-    <button type="submit" class="btn btn-primary">Bestätigen</button>
-</form>
-
-<script>
-    $(document).ready(function () {
-        $('#datepicker').datepicker({
-            format: 'dd.mm.yyyy',
-            autoclose: true,
-            todayHighlight: true,
-            language: 'de'
+    <h1>Bearbeitung von #(currentClubNight.eventName)</h1>
+    <form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
+        <div class="mb-3">
+            <label for="eventName" class="form-label">Event Name</label>
+            <input type="text" class="form-control" id="eventName" name="eventName" value="#(selectedClubNight.eventName)">
+            <div id="eventNameHelp" class="form-text">Bearbeite den Namen des Events</div>
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Wähle ein Datum:</label>
+            <input type="text" id="datepicker" class="form-control" placeholder="Datum..." autocomplete="off" name="date" value="#(selectedClubNight.date)">
+        </div>
+        <div class="mb-3">
+            <label for="totalGuests" class="form-label">Maximale Anzahl Gäste</label>
+            <input type="number" class="form-control" id="totalGuests" name="totalGuests" value="#(selectedClubNight.totalGuests)">
+            <div id="totalGuestsHelp" class="form-text">Bearbeite die Maximale Anzahl Gäste</div>
+        </div>
+        <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">
+                <label class="form-check-label" for="isActiveCheckbox">Aktive Nacht?</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Bestätigen</button>
+    </form>
+    <script>
+        $(document).ready(function () {
+            $('#datepicker').datepicker({
+                format: 'dd.mm.yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'de'
+            });
         });
-    });
-    document.getElementById('clubNightForm').addEventListener('submit', function () {
+        document.getElementById('clubNightForm').addEventListener('submit', function () {
             // Add a hidden input with the name isActive and value false if the checkbox is not checked
             if (!document.getElementById('isActiveCheckbox').checked) {
                 var hiddenInput = document.createElement('input');
@@ -42,6 +41,6 @@
                 this.appendChild(hiddenInput);
             }
         });
-</script>
+    </script>
 #endexport
 #endextend
