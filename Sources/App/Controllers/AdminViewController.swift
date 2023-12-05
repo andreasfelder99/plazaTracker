@@ -138,14 +138,3 @@ struct ActivateButton: Content {
 struct UpdateContext: Encodable {
     var selectedClubNight: ClubNight
 }
-
-struct QRTag: UnsafeUnescapedLeafTag {
-    func render(_ ctx: LeafContext) throws -> LeafData {
-        guard let url = ctx.parameters[0].string else { return .string("") }
-        let finalURL = "/session/\(url)"
-        let response = Response(headers: ["Content-Type": "image/png"], body: .init(data: QRCode.Document(utf8String: finalURL, errorCorrection: .high).pngData(dimension: 75)!))
-        return LeafData.string("<img src=\"data:image/png;base64,\(response.body.data?.base64EncodedString() ?? "")\" />")
-    }
-    
-    
-}
