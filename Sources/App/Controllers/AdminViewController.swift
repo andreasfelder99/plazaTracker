@@ -9,7 +9,6 @@ import Fluent
 import Foundation
 import Vapor
 import Leaf
-import QRCode
 
 struct AdminViewController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
