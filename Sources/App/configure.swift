@@ -12,15 +12,16 @@ public func configure(_ app: Application) async throws {
     
     
     
-    if var config = Environment.get("DATABASE_URL")
-        .flatMap(URL.init)
-        .flatMap(PostgresConfiguration.init) {
-      config.tlsConfiguration = .forClient(
-        certificateVerification: .none)
-      app.databases.use(.postgres(
-        configuration: config
-      ), as: .psql)
-    } else {
+    if let databaseURL = Environment.get("DATABASE_URL") {
+        var tlsConfig: TLSConfiguration = .makeClientConfiguration()
+        tlsConfig.certificateVerification = .none
+        let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
+
+        var postgresConfig = try SQLPostgresConfiguration(url: databaseURL)
+        postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
+
+        app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
+    }else {
         app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
             hostname: Environment.get("DATABASE_HOST") ?? "localhost",
             port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
@@ -43,8 +44,6 @@ public func configure(_ app: Application) async throws {
     
     try app.autoMigrate().wait()
     
-    //register custom tags
-    app.leaf.tags["QRTag"] = QRTag()
     // register routes
     try routes(app)
     
