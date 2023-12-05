@@ -1,6 +1,6 @@
-#extend("base"):
+#extend("newbase"):
 #export("content"):
-    <h1>Bearbeitung von #(currentClubNight.eventName)</h1>
+    <h1>Bearbeitung von #(selectedClubNight.eventName), #(selectedClubNight.date)</h1>
     <form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
         <div class="mb-3">
             <label for="eventName" class="form-label">Event Name</label>

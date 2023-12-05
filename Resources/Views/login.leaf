@@ -1,4 +1,4 @@
-#extend("base"):
+#extend("newbase"):
 #export("content"):
 <h1>#(title)</h1>
 

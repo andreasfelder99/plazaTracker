@@ -1,10 +1,12 @@
-#extend("base"):
+#extend("newbase"):
 #export("content"):
-<div class="counter-container">
-    <div class="counter-value" id="counterDisplay"></div>
-    <div class="counter-buttons">
-        <button class="btn btn-success btn-increase" onclick="sendMessage('increase')">Increase</button>
-        <button class="btn btn-danger btn-decrease" onclick="sendMessage('decrease')">Decrease</button>
+<div class="row text-center">
+    <div class="counter-container">
+        <div class="counter-value"><h1 id="counterDisplay"></h1></div>
+        <div class="counter-buttons">
+            <button class="btn btn-success btn-increase" onclick="sendMessage('increase')">Increase</button>
+            <button class="btn btn-danger btn-decrease" onclick="sendMessage('decrease')">Decrease</button>
+        </div>
     </div>
 </div>
 
@@ -14,6 +16,12 @@
 
     socket.onopen = (event) => {
         console.log('WebSocket connection opened:', event);
+            const data = JSON.parse(event.data);
+            const currentGuests = data.currentClubNight.currentGuests;
+            const totalGuests = data.currentClubNight.totalGuests;
+
+            // Update the counter value in the DOM
+            document.getElementById('counterDisplay').innerText = `${currentGuests} von maximal ${totalGuests} Gästen anwesend`;
     };
 
     socket.onmessage = (event) => {
@@ -24,7 +32,7 @@
             const totalGuests = data.currentClubNight.totalGuests;
 
             // Update the counter value in the DOM
-            document.getElementById('counterDisplay').innerText = `${currentGuests}/${totalGuests}`;
+            document.getElementById('counterDisplay').innerText = `${currentGuests} von maximal ${totalGuests} Gästen anwesend`;
         };
 
     socket.onclose = (event) => {

@@ -1,6 +1,9 @@
-#extend("base"):
+#extend("newbase"):
     #export("content"):
-        <h1>Welcome, #(username)</h1>
-
+        #if(isLoggedIn):
+        <h1>Willkommen, #(username)</h1>
+        #else:
+        <h1>Um dieses Tool zu benutzen, bitte einloggen..</h1>
+        #endif
 #endexport
 #endextend

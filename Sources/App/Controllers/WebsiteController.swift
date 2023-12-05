@@ -11,6 +11,8 @@ import Vapor
 
 struct WebsiteController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
+        routes.get("newDesign", use: newDesign)
+        
         let authSessionsRoutes = routes.grouped(User.sessionAuthenticator())
         authSessionsRoutes.get("login", use: loginHandler)
         authSessionsRoutes.post("logout", use: logoutHandler)
@@ -33,6 +35,10 @@ struct WebsiteController: RouteCollection {
             indexContent.email = user.email
         }
         return req.view.render("index", indexContent)
+    }
+    
+    func newDesign(req: Request) -> EventLoopFuture<View> {
+        return req.view.render("newbase")
     }
     
     func loginHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -73,7 +79,7 @@ struct IndexContext: Encodable {
 }
 
 struct LoginContext: Encodable {
-    let title = "logging in.."
+    let title = "Bitte einloggen. Falls du noch keinen Account hast, wende dich an den Administrator."
     let loginError: Bool
     
     init(loginError: Bool = false) {

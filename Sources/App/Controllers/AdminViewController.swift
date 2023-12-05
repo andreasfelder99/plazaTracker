@@ -39,16 +39,16 @@ struct AdminViewController: RouteCollection {
             }.flatMapError { error in
                 print("Error fetching club nights: \(error)")
                 print(String(reflecting: error))
-                return req.view.render("admin", AdminContext(isLoggedIn: false, username: "", clubNights: nil, currentClubNight: nil))
+                return req.view.render("newadmin", AdminContext(isLoggedIn: false, username: "", clubNights: nil, currentClubNight: nil))
             }
         } else {
             let adminContext = AdminContext(isLoggedIn: false, username: "", clubNights: nil, currentClubNight: nil)
-            return req.view.render("admin", adminContext)
+            return req.view.render("newadmin", adminContext)
         }
     }
     
     private func indexView(with adminContext: AdminContext, on req: Request) -> EventLoopFuture<View> {
-        return req.view.render("admin", adminContext)
+        return req.view.render("newadmin", adminContext)
     }
     
     func editClubNightViewHandler(_ req: Request) -> EventLoopFuture<View> {
