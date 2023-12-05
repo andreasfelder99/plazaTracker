@@ -3,6 +3,7 @@ import Fluent
 import FluentPostgresDriver
 import Leaf
 import Vapor
+import Redis
 
 // configures your application
 public func configure(_ app: Application) async throws {
@@ -43,6 +44,12 @@ public func configure(_ app: Application) async throws {
     app.logger.logLevel = .debug
     
     try app.autoMigrate().wait()
+    
+    let counterSystem = CounterSystem(eventLoop: app.eventLoopGroup.next())
+    app.webSocket("session") { req, ws in
+        counterSystem.connect(ws, req)
+    }
+    
     
     // register routes
     try routes(app)

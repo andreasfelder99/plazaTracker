@@ -29,7 +29,7 @@ struct CounterViewController: RouteCollection {
             .unwrap(or: Abort(.notFound))
             .map { clubNight in
                 CounterManager.shared.currentClubNight = clubNight
-                CounterManager.shared.webSocketURL += "\(clubNight.id!)"
+                CounterManager.shared.webSocketURL! += "\(clubNight.id!)"
             }
             .flatMapThrowing {
                 if CounterManager.shared.currentClubNight == nil {
@@ -51,7 +51,7 @@ class CounterManager: Encodable {
     
     var counterContext: CounterViewContext?
     var currentClubNight: ClubNight?
-    var webSocketURL = "ws://localhost:8080/session/"
+    var webSocketURL = Environment.get("WEBSOCKET")
     
     func increaseCounter(req: Request) {
         currentClubNight?.currentGuests! += 1

@@ -2,51 +2,17 @@
 #export("content"):
 <div class="row text-center">
     <div class="counter-container">
-        <div class="counter-value"><h1 id="counterDisplay"></h1></div>
+        <div class="counter-value"><h1 id="counterDisplay">Loading...</h1></div>
         <div class="counter-buttons">
-            <button class="btn btn-success btn-increase" onclick="sendMessage('increase')">Increase</button>
-            <button class="btn btn-danger btn-decrease" onclick="sendMessage('decrease')">Decrease</button>
+            <button class="btn btn-success btn-increase" onclick="javascript:increase()">Increase</button>
+            <button class="btn btn-danger btn-decrease" onclick="javascript:decrease()">Decrease</button>
+        </div>
+        <div>
+            <a href="javascript:WebSocketStart()">Start</a>
+            <a href="javascript:WebSocketStop()">Stop</a>
         </div>
     </div>
 </div>
-
-
-<script>
-    const socket = new WebSocket('#(webSocketURL)');
-
-    socket.onopen = (event) => {
-        console.log('WebSocket connection opened:', event);
-            const data = JSON.parse(event.data);
-            const currentGuests = data.currentClubNight.currentGuests;
-            const totalGuests = data.currentClubNight.totalGuests;
-
-            // Update the counter value in the DOM
-            document.getElementById('counterDisplay').innerText = `${currentGuests} von maximal ${totalGuests} Gästen anwesend`;
-    };
-
-    socket.onmessage = (event) => {
-            console.log('WebSocket message received:', event.data);
-
-            const data = JSON.parse(event.data);
-            const currentGuests = data.currentClubNight.currentGuests;
-            const totalGuests = data.currentClubNight.totalGuests;
-
-            // Update the counter value in the DOM
-            document.getElementById('counterDisplay').innerText = `${currentGuests} von maximal ${totalGuests} Gästen anwesend`;
-        };
-
-    socket.onclose = (event) => {
-        console.log('WebSocket connection closed:', event);
-    };
-
-    socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-    };
-
-    function sendMessage(message) {
-        socket.send(message);
-    }
-</script>
+<script src="/js/syncLogic.js"></script>
 #endexport
 #endextend
-
