@@ -43,15 +43,15 @@ public func configure(_ app: Application) async throws {
     
     app.logger.logLevel = .debug
     
-    try app.autoMigrate().wait()
+    try await app.autoMigrate()
     
-    let counterSystem = CounterSystem(eventLoop: app.eventLoopGroup.next())
+    let counterSystem = CounterSystem(eventLoop: app.eventLoopGroup.next(), database: app.db)
     app.webSocket("session") { req, ws in
         counterSystem.connect(ws, req)
     }
     
     
     // register routes
-    try routes(app)
+    try routes(app, counterSystem: counterSystem)
     
 }

@@ -152,76 +152,107 @@ struct CounterInput: Codable {
     let isPressed: Bool
 }
 
+import Fluent
+
 class CounterSystem {
-    var clients: WebsocketClients
+//    var clients: WebsocketClients
 
-    var timer: DispatchSourceTimer
+//    var timer: DispatchSourceTimer
+    
+    @ThreadSafe
+    var clients: [UUID: WebSocket]
+    let counter: Counter
 
-    init(eventLoop: EventLoop) {
-        self.clients = WebsocketClients(eventLoop: eventLoop)
-
-        self.timer = DispatchSource.makeTimerSource()
-        self.timer.setEventHandler { [unowned self] in
-            self.notify()
-        }
-        self.timer.schedule(deadline: .now() + .milliseconds(1000), repeating: .milliseconds(1000))
-        self.timer.activate()
+    init(eventLoop: EventLoop, database: Database) {
+        self.clients = [:]
+        self.counter = Counter(eventLoop: eventLoop, database: database)
+//
+//        self.timer = DispatchSource.makeTimerSource()
+//        self.timer.setEventHandler { [unowned self] in
+//            self.notify()
+//        }
+//        self.timer.schedule(deadline: .now() + .milliseconds(1000), repeating: .milliseconds(1000))
+//        self.timer.activate()
     }
 
     func connect(_ ws: WebSocket, _ req: Request) {
+        let id = UUID()
+        
         ws.onBinary { [unowned self] ws, buffer in
-            if let msg = buffer.decodeWebsocketMessage(Connect.self) {
-                let catcher = self.clients.storage.values
-                    .compactMap { $0 as? CounterUser }
-                    .filter { $0.status.catcher }
-                    .isEmpty
-
-                let counter = CounterUser(id: msg.client, socket: ws, status: .init(username: "", clubNight: CounterManager.shared.currentClubNight!, catcher: catcher))
-                self.clients.add(counter)
-
-                if
-                    let msg = buffer.decodeWebsocketMessage(CounterInput.self),
-                    let counter = self.clients.find(msg.client) as? CounterUser
-                {
-                    print("1")
-                    counter.update(msg.data)
-                }
+            
+            if let _ = buffer.decodeWebsocketMessage(Connect.self) {
+                self.clients[id] = ws
+//                let catcher = self.clients.storage.values
+//                    .compactMap { $0 as? CounterUser }
+//                    .filter { $0.status.catcher }
+//                    .isEmpty
+//
+//                let counter = CounterUser(id: msg.client, socket: ws, status: .init(username: "", clubNight: CounterManager.shared.currentClubNight!, catcher: catcher))
+//                self.clients.add(counter)
+//
+//                if
+//                    let msg = buffer.decodeWebsocketMessage(CounterInput.self),
+//                    let counter = self.clients.find(msg.client) as? CounterUser
+//                {
+//                    print("1")
+//                    counter.update(msg.data)
+//                }
             }
         }
-    }
-
-    func notify() {
-        let counters = self.clients.active.compactMap { $0 as? CounterUser }
-        guard !counters.isEmpty else {
-            return
-        }
-        print(clients.storage.values)
-
-        let counterUpdate = counters.map { counter -> CounterUser.Status in
-            counter.updateStatus()
-
-            counters.forEach { otherCounter in
-                guard otherCounter.id != counter.id,
-                      counter.status.catcher || otherCounter.status.catcher,
-                      otherCounter.status.clubNight?.currentGuests! != counter.status.clubNight?.currentGuests!
-                else {
-                    //print("2")
-                    return
-                }
-                otherCounter.status.catcher = !otherCounter.status.catcher
-                counter.status.catcher = !counter.status.catcher
+        
+        ws.onText { ws, text in
+            if text == "INCREASE" {
+                let newCount = self.counter.increaseCounter()
+                self.notify(newCount: newCount)
+            } else if text == "DECREASE" {
+                let newCount = self.counter.decreaseCounter()
+                self.notify(newCount: newCount)
             }
-            return counter.status
         }
-        let data = try! JSONEncoder().encode(counterUpdate)
-        counters.forEach { counter in
-            //print("3")
-            counter.socket.send([UInt8](data))
+        
+        _ = ws.onClose.always { _ in
+            self.clients.removeValue(forKey: id)
+        }
+    }
+    
+    func notify(newCount: Int) {
+        for (_, socket) in self.clients {
+            socket.send("New Count: \(newCount)")
         }
     }
 
-    deinit {
-        self.timer.setEventHandler {}
-        self.timer.cancel()
-    }
+//    func notify() {
+//        let counters = self.clients.active.compactMap { $0 as? CounterUser }
+//        guard !counters.isEmpty else {
+//            return
+//        }
+//        print(clients.storage.values)
+//
+//        let counterUpdate = counters.map { counter -> CounterUser.Status in
+//            counter.updateStatus()
+//
+//            counters.forEach { otherCounter in
+//                guard otherCounter.id != counter.id,
+//                      counter.status.catcher || otherCounter.status.catcher,
+//                      otherCounter.status.clubNight?.currentGuests! != counter.status.clubNight?.currentGuests!
+//                else {
+//                    //print("2")
+//                    return
+//                }
+//                otherCounter.status.catcher = !otherCounter.status.catcher
+//                counter.status.catcher = !counter.status.catcher
+//            }
+//            return counter.status
+//        }
+//        let data = try! JSONEncoder().encode(counterUpdate)
+//        counters.forEach { counter in
+//            //print("3")
+//            counter.socket.send([UInt8](data))
+//        }
+//    }
+
+//    deinit {
+//        self.timer.setEventHandler {}
+//        self.timer.cancel()
+//    }
 }

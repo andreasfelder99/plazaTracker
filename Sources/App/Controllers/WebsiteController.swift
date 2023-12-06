@@ -10,6 +10,9 @@ import Leaf
 import Vapor
 
 struct WebsiteController: RouteCollection {
+    
+    let adminController: AdminViewController
+    
     func boot(routes: Vapor.RoutesBuilder) throws {
         routes.get("newDesign", use: newDesign)
         
@@ -21,7 +24,7 @@ struct WebsiteController: RouteCollection {
         credentialsAuthRoutes.post("login", use: loginPostHandler)
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("admin", use: AdminViewController().index)
+        protectedRoutes.get("admin", use: adminController.index)
         protectedRoutes.get("counter", use: CounterViewController().index)
         
         authSessionsRoutes.get(use: index)

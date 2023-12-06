@@ -11,6 +11,9 @@ import Vapor
 import Leaf
 
 struct AdminViewController: RouteCollection {
+    
+    let counterSystem: CounterSystem
+    
     func boot(routes: RoutesBuilder) throws {
         routes.post("api", "clubnights", "create", use: createHandler)
         routes.post("api", "clubnights", ":clubnightID", "activate", use: activateClubNightHandler)
@@ -106,6 +109,8 @@ struct AdminViewController: RouteCollection {
                 clubnight.isActive = true
                 clubnight.update(on: req.db)
                 setAllOtherNightsToDisabled(req, id: clubnight.id ?? UUID())
+                self.counterSystem.counter.currentClubNight = clubnight
+                self.counterSystem.counter.currentCount = 0
                 return req.eventLoop.future(req.redirect(to: "/admin"))
             }
     }
