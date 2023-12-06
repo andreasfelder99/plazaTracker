@@ -54,9 +54,10 @@
         </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
     </div>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/js/chart.min.js"></script>
     <script src="/js/bs-init.js"></script>
     <script src="/js/theme.js"></script>
+    <script type="module" src="/js/chart.min.js></script>
+    <script type="module" src="/js/liveChart.js"></script>
 </body>
 
 </html>

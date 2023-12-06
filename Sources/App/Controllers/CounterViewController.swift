@@ -10,44 +10,17 @@ import Foundation
 import Vapor
 
 struct CounterViewController: RouteCollection {
-    
     let counterSystem: CounterSystem
     
-    func boot(routes: RoutesBuilder) throws { }
+    func boot(routes: RoutesBuilder) throws {}
     
-    func index(req: Request) throws -> EventLoopFuture<View> {
-        var indexContent = IndexContext(title: "Counter", isLoggedIn: false, username: "", email: "")
-        if let user = req.auth.get(User.self) {
-            indexContent.isLoggedIn = true
-            indexContent.username = user.name
-            indexContent.email = user.email
-            
-            guard let activeClubNight = counterSystem.counter.currentClubNight else {
-                let errorContext = ErrorContext(errorMessage: "Kein aktives Event vom Administrator ausgewählt!")
-                return req.view.render("counter", errorContext)
-            }
-            
-            let counterContext = CounterContext(indexContext: indexContent, activeClubNight: activeClubNight)
-            return req.view.render("counter", counterContext)
-        } else {
-            return req.view.render("counter", ErrorContext(errorMessage: "fail"))
-        }
+    func index(req: Request) async throws -> View {
+        var indexContent = await generateLoggedInContext(req)
+        return try await req.view.render("counter", indexContent)
     }
 }
 
-struct ErrorContext: Encodable {
-    let errorMessage: String
-    let isError = true
-}
-
-struct CounterContext: Encodable {
-    var indexContext: IndexContext
-    var activeClubNight: ClubNight
-    let isError = false
-}
-
 class Counter {
-
     @ThreadSafe
     var currentClubNight: ClubNight?
     let eventLoop: EventLoop
@@ -57,13 +30,9 @@ class Counter {
     
     init(eventLoop: EventLoop, database: Database) {
         self.eventLoop = eventLoop
-        eventLoop.scheduleRepeatedAsyncTask(initialDelay: .seconds(10), delay: .seconds(10)) { task in
+        eventLoop.scheduleRepeatedAsyncTask(initialDelay: .seconds(10), delay: .seconds(10)) { _ in
             if let currentClubNight = self.currentClubNight {
-                if currentClubNight.currentGuests! > self.currentCount {
-                    self.currentCount = currentClubNight.currentGuests!
-                } else {
-                    currentClubNight.currentGuests = self.currentCount
-                }
+                currentClubNight.currentGuests = self.currentCount
                 return currentClubNight.save(on: database)
             } else {
                 return eventLoop.future()

@@ -12,6 +12,8 @@ function WebSocketStart() {
   ws = new WebSocket("ws://" + window.location.host + "/session");
   ws.onopen = () => {
     console.log("Socket is opened.");
+    const counterDisplay = document.getElementById("counterDisplay");
+    ws.send(counterDisplay.innerText)
     ws.send("INITIATE");
   };
 

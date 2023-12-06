@@ -28,29 +28,9 @@ struct AdminViewController: RouteCollection {
         protectedRoutes.post("admin", "new", use: createHandler)
     }
     
-    func index(_ req: Request) -> EventLoopFuture<View> {
-        if let user = req.auth.get(User.self) {
-            return getAllHandler(req).flatMap { clubNights in
-                // Fetch active night
-                let activeNight = clubNights.filter { $0.isActive }.first
-                
-                
-                let adminContext = AdminContext(isLoggedIn: true, username: user.name, clubNights: clubNights, currentClubNight: activeNight)
-                
-                return indexView(with: adminContext, on: req)
-            }.flatMapError { error in
-                print("Error fetching club nights: \(error)")
-                print(String(reflecting: error))
-                return req.view.render("newadmin", AdminContext(isLoggedIn: false, username: "", clubNights: nil, currentClubNight: nil))
-            }
-        } else {
-            let adminContext = AdminContext(isLoggedIn: false, username: "", clubNights: nil, currentClubNight: nil)
-            return req.view.render("newadmin", adminContext)
-        }
-    }
-    
-    private func indexView(with adminContext: AdminContext, on req: Request) -> EventLoopFuture<View> {
-        return req.view.render("newadmin", adminContext)
+    func index(_ req: Request) async throws -> View {
+        let context = await generateLoggedInContext(req)
+        return try await req.view.render("newadmin", context)
     }
     
     func editClubNightViewHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -95,7 +75,7 @@ struct AdminViewController: RouteCollection {
                     setAllOtherNightsToDisabled(req, id: updatedClubNight.id ?? UUID())
                 }
                 
-                clubNight.update(on: req.db)
+                _ = clubNight.update(on: req.db)
                 
                 // Redirect to /admin after updating the club night
                 return req.eventLoop.future(req.redirect(to: "/admin"))
@@ -107,10 +87,10 @@ struct AdminViewController: RouteCollection {
             .unwrap(or: Abort(.notFound))
             .flatMap { clubnight in
                 clubnight.isActive = true
-                clubnight.update(on: req.db)
+                _ = clubnight.update(on: req.db)
                 setAllOtherNightsToDisabled(req, id: clubnight.id ?? UUID())
                 self.counterSystem.counter.currentClubNight = clubnight
-                self.counterSystem.counter.currentCount = 0
+                self.counterSystem.counter.currentCount = clubnight.currentGuests ?? 0
                 return req.eventLoop.future(req.redirect(to: "/admin"))
             }
     }
@@ -122,17 +102,11 @@ struct AdminViewController: RouteCollection {
                 clubNights.forEach { night in
                     if night.id != id {
                         night.isActive = false
-                        night.update(on: req.db)
+                        _ = night.update(on: req.db)
                     }
                 }
             }
     }
-}
-struct AdminContext: Encodable {
-    var isLoggedIn: Bool
-    var username: String
-    var clubNights: [ClubNight]?
-    var currentClubNight: ClubNight?
 }
 
 struct ActivateButton: Content {

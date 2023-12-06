@@ -8,6 +8,7 @@
 import Foundation
 import Leaf
 import Vapor
+import Fluent
 
 struct WebsiteController: RouteCollection {
     
@@ -31,18 +32,13 @@ struct WebsiteController: RouteCollection {
         authSessionsRoutes.get(use: index)
     }
 
-    func index(req: Request) -> EventLoopFuture<View> {
-        var indexContent = IndexContext(title: "Welcome", isLoggedIn: false, username: "", email: "")
-        if let user = req.auth.get(User.self) {
-            indexContent.isLoggedIn = true
-            indexContent.username = user.name
-            indexContent.email = user.email
-        }
-        return req.view.render("index", indexContent)
+    func index(req: Request) async throws -> View {
+        var indexContent = await generateLoggedInContext(req)
+        return try await req.view.render("index", indexContent)
     }
     
-    func newDesign(req: Request) -> EventLoopFuture<View> {
-        return req.view.render("newbase")
+    func newDesign(req: Request) async throws -> View {
+        return try await req.view.render("newbase")
     }
     
     func loginHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -75,11 +71,14 @@ struct WebsiteController: RouteCollection {
     }
 }
 
-struct IndexContext: Encodable {
+public struct LoggedInContext: Encodable {
     var title: String
     var isLoggedIn: Bool
     var username: String
     var email: String
+    var activeClubNight: ClubNight?
+    var clubNights: [ClubNight]?
+    var isError: Bool = false
 }
 
 struct LoginContext: Encodable {
@@ -89,4 +88,37 @@ struct LoginContext: Encodable {
     init(loginError: Bool = false) {
         self.loginError = loginError
     }
+}
+
+public func generateLoggedInContext(_ req: Request) async -> LoggedInContext {
+    var loggedInContext = LoggedInContext(title: "", isLoggedIn: false, username: "", email: "")
+    
+    do {
+        if let user = req.auth.get(User.self) {
+            loggedInContext.isLoggedIn = true
+            loggedInContext.username = user.name
+            loggedInContext.email = user.email
+        }
+        
+        let clubNights = try await req.db.query(ClubNight.self).sort( \.$date).sort(\.$id).all()
+        let activeClubNight = clubNights.filter { $0.isActive }.first
+        
+        loggedInContext.clubNights = clubNights
+        loggedInContext.activeClubNight = activeClubNight
+        
+        return loggedInContext
+    } catch {
+        return loggedInContext
+    }
+}
+
+public func getActiveNight(db: Database) async -> Int {
+    do {
+        let nights = try await db.query(ClubNight.self).all()
+        let activeNight = nights.filter { $0.isActive }.first
+        return activeNight?.currentGuests ?? 0
+    } catch {
+        print("Error at getActiveNight")
+    }
+    return 0
 }
