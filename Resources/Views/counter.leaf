@@ -1,18 +1,46 @@
 #extend("newbase"):
 #export("content"):
-<div class="row text-center">
-    <div class="counter-container">
-        <div class="counter-value"><h1 id="counterDisplay">Loading...</h1></div>
-        <div class="counter-buttons">
-            <button class="btn btn-success btn-increase" onclick="javascript:increase()">Increase</button>
-            <button class="btn btn-danger btn-decrease" onclick="javascript:decrease()">Decrease</button>
-        </div>
-        <div>
-            <a href="javascript:WebSocketStart()">Start</a>
-            <a href="javascript:WebSocketStop()">Stop</a>
-        </div>
+<style>
+   #counterDisplay {
+       font-size: 5em;
+       height: 200px;
+       width: 200px;
+       border-radius: 50%;
+       margin-bottom: 50px;
+       color: white;
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+   }
+    
+   .btn-custom {
+       font-size: 5em;
+       margin: 10px;
+       color: white;
+   }
+</style>
+    <div class="container">
+        #if(isError):
+            <h1>#(errorMessage)</h1>
+            <h1>Bitte die Seite neu laden</h1>
+            #(activeClubNight.currentGuests)
+        #else:
+            <div class="row">
+                <div class="col text-center">
+                    <div class="counter-value bg-success" id="counterDisplay">#(activeClubNight.currentGuests)</div>
+                </div>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-success btn-lg btn-block btn-custom" id="button.increase">+</button>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-danger btn-lg btn-block btn-custom" id="button.decrease">-</button>
+            </div>
+        #endif
     </div>
-</div>
 <script src="/js/syncLogic.js"></script>
 #endexport
 #endextend
+
+
+

@@ -12,6 +12,7 @@ import Vapor
 struct WebsiteController: RouteCollection {
     
     let adminController: AdminViewController
+    let counterController: CounterViewController
     
     func boot(routes: Vapor.RoutesBuilder) throws {
         routes.get("newDesign", use: newDesign)
@@ -25,7 +26,7 @@ struct WebsiteController: RouteCollection {
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
         protectedRoutes.get("admin", use: adminController.index)
-        protectedRoutes.get("counter", use: CounterViewController().index)
+        protectedRoutes.get("counter", use: counterController.index)
         
         authSessionsRoutes.get(use: index)
     }

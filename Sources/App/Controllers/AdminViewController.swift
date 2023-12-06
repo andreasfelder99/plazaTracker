@@ -31,7 +31,7 @@ struct AdminViewController: RouteCollection {
     func index(_ req: Request) -> EventLoopFuture<View> {
         if let user = req.auth.get(User.self) {
             return getAllHandler(req).flatMap { clubNights in
-                // Fetch all active nights
+                // Fetch active night
                 let activeNight = clubNights.filter { $0.isActive }.first
                 
                 
