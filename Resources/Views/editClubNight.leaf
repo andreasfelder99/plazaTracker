@@ -23,6 +23,26 @@
         </div>
         <button type="submit" class="btn btn-primary">Bestätigen</button>
     </form>
+    <script>
+        $(document).ready(function () {
+            $('#datepicker').datepicker({
+                format: 'dd.mm.yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'de'
+            });
+        });
+        document.getElementById('clubNightForm').addEventListener('submit', function () {
+            // Add a hidden input with the name isActive and value false if the checkbox is not checked
+            if (!document.getElementById('isActiveCheckbox').checked) {
+                var hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'isActive';
+                hiddenInput.value = 'false';
+                this.appendChild(hiddenInput);
+            }
+        });
+    </script>
 #else:
     <h1>Bearbeitung von #(selectedClubNight.eventName), #(selectedClubNight.date)</h1>
     <form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
@@ -46,8 +66,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Bestätigen</button>
     </form>
-#endif
-<script>
+    <script>
         $(document).ready(function () {
             $('#datepicker').datepicker({
                 format: 'dd.mm.yyyy',
@@ -67,5 +86,6 @@
             }
         });
 </script>
+#endif
 #endexport
 #endextend

@@ -5,6 +5,7 @@
 //  Created by Andreas Felder on 20.11.2023.
 //
 
+//TODO: JS checkbox fixen, event aktiv fixen, leben in griff bekommen, heroku push
 import Fluent
 import Foundation
 import Vapor
@@ -59,8 +60,10 @@ struct AdminViewController: RouteCollection {
         return clubNight.save(on: req.db)
             .map { _ in
                 // Redirect to /admin after creating a new ClubNight
-                req.redirect(to: "/admin")
+                setAllOtherNightsToDisabled(req, id: clubNight.id!)
+                return req.redirect(to: "/admin")
             }
+       
     }
     
     func getHandler(_ req: Request) throws -> EventLoopFuture<ClubNight> {
