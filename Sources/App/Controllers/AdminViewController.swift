@@ -24,12 +24,18 @@ struct AdminViewController: RouteCollection {
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
         protectedRoutes.get("admin", ":clubnightID", use: editClubNightViewHandler)
+        protectedRoutes.get("admin", "new", use: createViewHandler)
+        
         protectedRoutes.post("admin", ":clubnightID", use: updateHandler)
         protectedRoutes.post("admin", "new", use: createHandler)
     }
     
     func index(_ req: Request) async throws -> View {
         let context = await generateLoggedInContext(req)
+        guard let id = context.activeClubNight?.id else {
+            return try await req.view.render("newadmin", context)
+        }
+        setAllOtherNightsToDisabled(req, id: id)
         return try await req.view.render("newadmin", context)
     }
     
@@ -47,6 +53,7 @@ struct AdminViewController: RouteCollection {
         ClubNight.query(on: req.db).all()
     }
     
+    //TODO: Change status of all other events after creating a new one
     func createHandler(_ req: Request) throws -> EventLoopFuture<Response> {
         let clubNight = try req.content.decode(ClubNight.self)
         return clubNight.save(on: req.db)
@@ -59,6 +66,11 @@ struct AdminViewController: RouteCollection {
     func getHandler(_ req: Request) throws -> EventLoopFuture<ClubNight> {
         ClubNight.find(req.parameters.get("clubnightID"), on: req.db)
             .unwrap(or: Abort(.notFound))
+    }
+    
+    func createViewHandler(_ req: Request) async throws -> View {
+        let context = CreateContext(isCreating: true)
+        return try await req.view.render("editClubNight", context)
     }
     
     func updateHandler(_ req: Request) throws -> EventLoopFuture<Response> {
@@ -115,4 +127,8 @@ struct ActivateButton: Content {
 
 struct UpdateContext: Encodable {
     var selectedClubNight: ClubNight
+}
+
+struct CreateContext: Encodable {
+    var isCreating: Bool
 }

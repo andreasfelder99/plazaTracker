@@ -1,5 +1,29 @@
 #extend("newbase"):
 #export("content"):
+#if(isCreating):
+    <h1>Neues Event erstellen</h1>
+    <form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
+        <div class="mb-3">
+            <label for="eventName" class="form-label">Event Name</label>
+            <input type="text" class="form-control" id="eventName" name="eventName" value="">
+            <div id="eventNameHelp" class="form-text">Name des Events</div>
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Wähle ein Datum:</label>
+            <input type="text" id="datepicker" class="form-control" placeholder="Datum..." autocomplete="off" name="date" value="">
+        </div>
+        <div class="mb-3">
+            <label for="totalGuests" class="form-label">Maximale Anzahl Gäste</label>
+            <input type="number" class="form-control" id="totalGuests" name="totalGuests" value="">
+            <div id="totalGuestsHelp" class="form-text">Maximale Anzahl Gäste</div>
+        </div>
+        <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">
+                <label class="form-check-label" for="isActiveCheckbox">Aktive Nacht?</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Bestätigen</button>
+    </form>
+#else:
     <h1>Bearbeitung von #(selectedClubNight.eventName), #(selectedClubNight.date)</h1>
     <form class="container" style="max-width: 400px;" method="post" id="clubNightForm">
         <div class="mb-3">
@@ -22,7 +46,8 @@
         </div>
         <button type="submit" class="btn btn-primary">Bestätigen</button>
     </form>
-    <script>
+#endif
+<script>
         $(document).ready(function () {
             $('#datepicker').datepicker({
                 format: 'dd.mm.yyyy',
@@ -41,6 +66,6 @@
                 this.appendChild(hiddenInput);
             }
         });
-    </script>
+</script>
 #endexport
 #endextend
