@@ -54,12 +54,10 @@
                                             <div class="text-uppercase text-info fw-bold text-xs mb-1"><span>Momentane Auslastung</span></div>
                                             <div class="row g-0 align-items-center">
                                                 <div class="col-auto">
-                                                    <div class="text-dark fw-bold h5 mb-0 me-3"><span>23%</span></div>
+                                                    <div class="text-dark fw-bold h5 mb-0 me-3"><span>#(liveCapacity)%</span></div>
                                                 </div>
                                                 <div class="col">
-                                                    <div class="progress progress-sm">
-                                                        <div class="progress-bar bg-info" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 23%;"><span class="visually-hidden">23%</span></div>
-                                                    </div>
+                                                    #liveCapacity()
                                                 </div>
                                             </div>
                                         </div>
@@ -148,6 +146,14 @@
                             </div>
                         </div>
                     </div>
+<script>
+$(function() {
+    setInterval(function (){
+        window.location.reload
+        console.log("reloaded")
+}, 5000);
+});
+</script>
 #endexport
 #endextend
 

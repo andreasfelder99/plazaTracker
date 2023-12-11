@@ -5,7 +5,6 @@
 //  Created by Andreas Felder on 20.11.2023.
 //
 
-//TODO: JS checkbox fixen, event aktiv fixen, leben in griff bekommen, heroku push
 import Fluent
 import Foundation
 import Vapor
@@ -32,11 +31,13 @@ struct AdminViewController: RouteCollection {
     }
     
     func index(_ req: Request) async throws -> View {
-        let context = await generateLoggedInContext(req)
+        var context = await generateLoggedInContext(req)
         guard let id = context.activeClubNight?.id else {
             return try await req.view.render("newadmin", context)
         }
         setAllOtherNightsToDisabled(req, id: id)
+        context.liveCapacity = Int((Double(context.activeClubNight!.currentGuests!) / Double(context.activeClubNight!.totalGuests))*100)
+        print(context.liveCapacity)
         return try await req.view.render("newadmin", context)
     }
     

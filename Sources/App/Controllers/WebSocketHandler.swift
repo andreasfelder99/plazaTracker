@@ -27,6 +27,8 @@ class CounterSystem {
     func connect(_ ws: WebSocket, _ req: Request) {
         let id = UUID()
         
+        ws.pingInterval = .seconds(10)
+        
         ws.onText { ws, text in
             if text == "INITIATE" {
                 self.clients[id] = ws
@@ -34,11 +36,19 @@ class CounterSystem {
             }
             else if text == "INCREASE" {
                 let newCount = self.counter.increaseCounter()
-                self.notify(newCount: newCount)
+                self.notifyCounters(newCount: newCount)
             } else if text == "DECREASE" {
                 let newCount = self.counter.decreaseCounter()
-                self.notify(newCount: newCount)
+                self.notifyCounters(newCount: newCount)
             }
+        }
+        
+        ws.onPing { socket, data in
+            print("ping received")
+        }
+        
+        ws.onPong { socket, data in
+            socket.sendPing()
         }
         
         _ = ws.onClose.always { _ in
@@ -46,7 +56,7 @@ class CounterSystem {
         }
     }
     
-    func notify(newCount: Int) {
+    func notifyCounters(newCount: Int) {
         for (_, socket) in self.clients {
             socket.send("\(newCount)")
         }

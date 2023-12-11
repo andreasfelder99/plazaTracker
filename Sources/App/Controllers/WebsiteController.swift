@@ -77,6 +77,7 @@ public struct LoggedInContext: Encodable {
     var username: String
     var email: String
     var activeClubNight: ClubNight?
+    var liveCapacity = 0
     var clubNights: [ClubNight]?
     var isError: Bool = false
 }
