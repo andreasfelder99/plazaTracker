@@ -26,7 +26,8 @@ struct WebsiteController: RouteCollection {
         credentialsAuthRoutes.post("login", use: loginPostHandler)
         
         let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("admin", use: adminController.index)
+        let adminProtectedRoutes = protectedRoutes.grouped(EnsureAdminUserMiddleware())
+        adminProtectedRoutes.get("admin", use: adminController.index)
         protectedRoutes.get("counter", use: counterController.index)
         
         authSessionsRoutes.get(use: index)

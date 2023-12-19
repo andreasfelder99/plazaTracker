@@ -16,7 +16,7 @@ struct UserViewController: RouteCollection {
         
         passwordProtected.get(use: getAllHandler(_:))
         passwordProtected.get("me", use: getMeHandler(_:))
-        passwordProtected.post("create", use: createHandler(_:))
+        userViewController.post("create", use: createHandler(_:))
         passwordProtected.post("login", use: loginHandler(_:))
     }
     

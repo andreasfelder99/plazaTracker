@@ -36,9 +36,9 @@ public func configure(_ app: Application) async throws {
     
     app.migrations.add(CreateClubNight())
     app.migrations.add(User.Migration())
-    app.migrations.add(UserToken.Migration())
     app.migrations.add(ClubNightUpdateMigration())
     app.migrations.add(ClubNightUpdateCurrentGuestsMigration())
+    app.migrations.add(CreateClubNightData())
     
     app.logger.logLevel = .debug
     

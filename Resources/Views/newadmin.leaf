@@ -106,10 +106,10 @@
                                     <h6 class="text-primary fw-bold m-0">Auslastung Live</h6>
                                 </div>
                                 <div class="card-body">
-                                    <div id="chart" class="chart-area">
-                                        <canvas id="liveChart"></canvas>
-                                    </div>
-                                </div>
+                                   <div id="chart" class="chart-area" style="height: 100%;">
+    <canvas id="liveChart" style="max-width: 100%; height: 100%;"></canvas>
+</div>
+                      </div>
                             </div>
                         </div>
                         <div class="col-lg-5 col-xl-4">
@@ -146,14 +146,7 @@
                             </div>
                         </div>
                     </div>
-<script>
-$(function() {
-    setInterval(function (){
-        window.location.reload
-        console.log("reloaded")
-}, 5000);
-});
-</script>
+<script src="/js/liveChart.js"></script>
 #endexport
 #endextend
 

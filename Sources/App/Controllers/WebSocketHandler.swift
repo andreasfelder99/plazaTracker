@@ -40,6 +40,7 @@ class CounterSystem {
             } else if text == "DECREASE" {
                 let newCount = self.counter.decreaseCounter()
                 self.notifyCounters(newCount: newCount)
+                
             }
         }
         
@@ -62,3 +63,4 @@ class CounterSystem {
         }
     }
 }
+

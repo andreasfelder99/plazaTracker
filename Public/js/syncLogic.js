@@ -9,7 +9,7 @@ window.onunload = function () {
 };
 
 function WebSocketStart() {
-  ws = new WebSocket("wss://" + window.location.host + "/session");
+  ws = new WebSocket("ws://" + window.location.host + "/session");
   ws.onopen = () => {
     console.log("Socket is opened.");
     const counterDisplay = document.getElementById("counterDisplay");

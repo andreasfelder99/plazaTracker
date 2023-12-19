@@ -23,21 +23,37 @@ struct CounterViewController: RouteCollection {
 class Counter {
     @ThreadSafe
     var currentClubNight: ClubNight?
+    var currentDataElement: TrackingData?
     let eventLoop: EventLoop
     
     @ThreadSafe
     var currentCount = 0
+    var nightData = NightData(data: ["INIT": 0])
     
     init(eventLoop: EventLoop, database: Database) {
+        print("1")
         self.eventLoop = eventLoop
         eventLoop.scheduleRepeatedAsyncTask(initialDelay: .seconds(10), delay: .seconds(10)) { _ in
             if let currentClubNight = self.currentClubNight {
                 currentClubNight.currentGuests = self.currentCount
-                return currentClubNight.save(on: database)
+                if let currentDataElement = self.currentDataElement {
+                    self.createDataEntry()
+                    currentDataElement.nightData = self.nightData
+                    print(currentDataElement.nightData)
+                    _ = currentDataElement.save(on: database)
+                } else {
+                    guard let activeClubNightID = currentClubNight.id else {
+                        return eventLoop.future()
+                    }
+                    self.currentDataElement = TrackingData(clubNightID: activeClubNightID, nightData: self.nightData)
+                    _ = self.currentDataElement!.save(on: database)
+                }
+                _ = currentClubNight.save(on: database)
+                
             } else {
                 return eventLoop.future()
             }
-            // This is where you can update the database
+            return eventLoop.future()
         }
     }
     
@@ -51,5 +67,16 @@ class Counter {
             self.currentCount -= 1
         }
         return self.currentCount
+    }
+    
+    func createDataEntry() {
+        let date = Date()
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let dateString = df.string(from: date)
+        
+        print(dateString)
+        
+        self.nightData.data.updateValue(self.currentCount, forKey: dateString)
     }
 }

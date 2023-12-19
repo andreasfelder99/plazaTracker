@@ -7,27 +7,24 @@
 
 import Fluent
 import Foundation
-import Vapor
 import Leaf
+import Vapor
 
 struct AdminViewController: RouteCollection {
-    
     let counterSystem: CounterSystem
     
     func boot(routes: RoutesBuilder) throws {
         routes.post("api", "clubnights", "create", use: createHandler)
         routes.post("api", "clubnights", ":clubnightID", "activate", use: activateClubNightHandler)
         
-        let authSessionsRoutes = routes.grouped(User.sessionAuthenticator())
+        let protectedRoutes = routes.grouped(User.redirectMiddleware(path: "/login"))
+        let adminProtectedRoutes = protectedRoutes.grouped(EnsureAdminUserMiddleware())
+        adminProtectedRoutes.get("admin", ":clubnightID", use: editClubNightViewHandler)
+        adminProtectedRoutes.get("admin", "new", use: createViewHandler)
+        adminProtectedRoutes.get("admin", "getLiveData", use: liveGraphDataHandler)
         
-        let credentialsAuthRoutes = authSessionsRoutes.grouped(User.credentialsAuthenticator())
-        
-        let protectedRoutes = authSessionsRoutes.grouped(User.redirectMiddleware(path: "/login"))
-        protectedRoutes.get("admin", ":clubnightID", use: editClubNightViewHandler)
-        protectedRoutes.get("admin", "new", use: createViewHandler)
-        
-        protectedRoutes.post("admin", ":clubnightID", use: updateHandler)
-        protectedRoutes.post("admin", "new", use: createHandler)
+        adminProtectedRoutes.post("admin", ":clubnightID", use: updateHandler)
+        adminProtectedRoutes.post("admin", "new", use: createHandler)
     }
     
     func index(_ req: Request) async throws -> View {
@@ -36,9 +33,23 @@ struct AdminViewController: RouteCollection {
             return try await req.view.render("newadmin", context)
         }
         setAllOtherNightsToDisabled(req, id: id)
-        context.liveCapacity = Int((Double(context.activeClubNight!.currentGuests!) / Double(context.activeClubNight!.totalGuests))*100)
-        print(context.liveCapacity)
+        context.liveCapacity = Int((Double(context.activeClubNight!.currentGuests!) / Double(context.activeClubNight!.totalGuests)) * 100)
         return try await req.view.render("newadmin", context)
+    }
+    
+    func liveGraphDataHandler(_ req: Request) async throws -> GetTrackingData {
+        do {
+            if let activeClubNightID = try await ClubNight.query(on: req.db).filter(\.$isActive == true).first()?.id {
+                guard let currentData = try await TrackingData.query(on: req.db).filter(\.$clubNight.$id == activeClubNightID).first() else {
+                    throw Abort(.notFound)
+                }
+                return GetTrackingData(clubNightID: currentData.$clubNight.id, trackingDataID: currentData.id!, trackingData: currentData.nightData)
+            }
+            
+        } catch {
+            throw Abort(.notFound)
+        }
+        throw Abort(.notFound)
     }
     
     func editClubNightViewHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -51,11 +62,14 @@ struct AdminViewController: RouteCollection {
             }
     }
 
-    func getAllHandler(_ req: Request) -> EventLoopFuture<[ClubNight]> {
-        ClubNight.query(on: req.db).all()
+    func getAllHandler(_ req: Request) async -> [ClubNight] {
+        do {
+            return try await ClubNight.all(on: req.db)
+        } catch {
+            req.logger.report(error: error)
+            return []
+        }
     }
-    
-    //TODO: Change status of all other events after creating a new one
     func createHandler(_ req: Request) throws -> EventLoopFuture<Response> {
         let clubNight = try req.content.decode(ClubNight.self)
         return clubNight.save(on: req.db)
@@ -64,7 +78,6 @@ struct AdminViewController: RouteCollection {
                 setAllOtherNightsToDisabled(req, id: clubNight.id!)
                 return req.redirect(to: "/admin")
             }
-       
     }
     
     func getHandler(_ req: Request) throws -> EventLoopFuture<ClubNight> {
@@ -135,4 +148,10 @@ struct UpdateContext: Encodable {
 
 struct CreateContext: Encodable {
     var isCreating: Bool
+}
+
+struct GetTrackingData: Content {
+    let clubNightID: UUID
+    let trackingDataID: UUID
+    let trackingData: NightData
 }
