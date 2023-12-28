@@ -39,6 +39,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(ClubNightUpdateMigration())
     app.migrations.add(ClubNightUpdateCurrentGuestsMigration())
     app.migrations.add(CreateClubNightData())
+    app.migrations.add(ClubNightDatabaseTimeStampMigration())
     
     app.logger.logLevel = .debug
     

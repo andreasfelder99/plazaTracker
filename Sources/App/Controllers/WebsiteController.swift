@@ -16,7 +16,7 @@ struct WebsiteController: RouteCollection {
     let counterController: CounterViewController
     
     func boot(routes: Vapor.RoutesBuilder) throws {
-        routes.get("newDesign", use: newDesign)
+        
         
         let authSessionsRoutes = routes.grouped(User.sessionAuthenticator())
         authSessionsRoutes.get("login", use: loginHandler)
@@ -36,10 +36,6 @@ struct WebsiteController: RouteCollection {
     func index(req: Request) async throws -> View {
         var indexContent = await generateLoggedInContext(req)
         return try await req.view.render("index", indexContent)
-    }
-    
-    func newDesign(req: Request) async throws -> View {
-        return try await req.view.render("newbase")
     }
     
     func loginHandler(_ req: Request) -> EventLoopFuture<View> {
@@ -75,6 +71,7 @@ struct WebsiteController: RouteCollection {
 public struct LoggedInContext: Encodable {
     var title: String
     var isLoggedIn: Bool
+    var isAdmin = false
     var username: String
     var email: String
     var activeClubNight: ClubNight?
@@ -92,6 +89,15 @@ struct LoginContext: Encodable {
     }
 }
 
+struct authErrorContext: Encodable {
+    let title = "Not sufficient permissions to enter this part of the webapp!"
+    let permissionError: Bool
+    
+    init(permissionError: Bool) {
+        self.permissionError = permissionError
+    }
+}
+
 public func generateLoggedInContext(_ req: Request) async -> LoggedInContext {
     var loggedInContext = LoggedInContext(title: "", isLoggedIn: false, username: "", email: "")
     
@@ -100,6 +106,10 @@ public func generateLoggedInContext(_ req: Request) async -> LoggedInContext {
             loggedInContext.isLoggedIn = true
             loggedInContext.username = user.name
             loggedInContext.email = user.email
+            
+            if user.userType == .admin {
+                loggedInContext.isAdmin = true
+            }
         }
         
         let clubNights = try await req.db.query(ClubNight.self).sort( \.$date).sort(\.$id).all()
