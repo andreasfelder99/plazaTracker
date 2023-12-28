@@ -130,6 +130,7 @@
                                                         <a href="admin/#(clubnight.id)/" class="list-group-item list-group-item-action">#(clubnight.eventName), #(clubnight.date)</a>
                                                     </div>
                                                 </div>
+                                            <div class="row">
                                                 #if(!clubnight.isActive):
                                                 <div class="col-auto">
                                                     <form class="form-inline" action="/api/clubnights/#(clubnight.id)/activate" method="post">
@@ -137,6 +138,12 @@
                                                     </form>
                                                 </div>
                                                 #endif
+                                                <div class="col-auto">
+                                                    <form class="form-inline" action="/admin/#(clubnight.id)/delete" method="post">
+                                                        <input class="btn btn-outline-danger" type="submit" value="Löschen">
+                                                    </form>
+                                                </div>
+                                                                                                </div>
                                             </div>
                                         </div>
                                         #endfor

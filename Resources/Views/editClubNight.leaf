@@ -17,6 +17,11 @@
             <input type="number" class="form-control" id="totalGuests" name="totalGuests" value="">
             <div id="totalGuestsHelp" class="form-text">Maximale Anzahl Gäste</div>
         </div>
+        <div class="mb-3">
+            <label for="currentGuests" class="form-label">Momentane Anzahl Gäste</label>
+            <input type="number" class="form-control" id="totalGuests" name="currentGuests" value="">
+            <div id="currentGuestsHelp" class="form-text">Momentane Anzahl Gäste</div>
+        </div>
         <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">
                 <label class="form-check-label" for="isActiveCheckbox">Aktive Nacht?</label>
@@ -59,6 +64,11 @@
             <label for="totalGuests" class="form-label">Maximale Anzahl Gäste</label>
             <input type="number" class="form-control" id="totalGuests" name="totalGuests" value="#(selectedClubNight.totalGuests)">
             <div id="totalGuestsHelp" class="form-text">Bearbeite die Maximale Anzahl Gäste</div>
+        </div>
+        <div class="mb-3">
+            <label for="currentGuests" class="form-label">Momentane Anzahl Gäste</label>
+            <input type="number" class="form-control" id="totalGuests" name="currentGuests">
+            <div id="currentGuestsHelp" class="form-text">Bearbeite die Momentane Anzahl an Gästen</div>
         </div>
         <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="isActiveCheckbox" name="isActive" value="true">

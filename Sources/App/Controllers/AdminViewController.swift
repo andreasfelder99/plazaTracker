@@ -25,6 +25,7 @@ struct AdminViewController: RouteCollection {
         
         adminProtectedRoutes.post("admin", ":clubnightID", use: updateHandler)
         adminProtectedRoutes.post("admin", "new", use: createHandler)
+        adminProtectedRoutes.post("admin", ":clubnightID", "delete", use: deleteHandler)
     }
     
     func index(_ req: Request) async throws -> View {
@@ -35,6 +36,20 @@ struct AdminViewController: RouteCollection {
         setAllOtherNightsToDisabled(req, id: id)
         context.liveCapacity = Int((Double(context.activeClubNight!.currentGuests!) / Double(context.activeClubNight!.totalGuests)) * 100)
         return try await req.view.render("newadmin", context)
+    }
+    
+    func deleteHandler(_ req: Request) async throws -> Response {
+        guard let id = req.parameters.get("clubnightID", as: UUID.self) else {
+            throw Abort(.badRequest)
+        }
+        do {
+            if let clubNight = try await ClubNight.find(id, on: req.db) {
+                try await clubNight.delete(on: req.db)
+            }
+            return req.redirect(to: "/admin")
+        } catch {
+            throw Abort(.internalServerError)
+        }
     }
     
     func liveGraphDataHandler(_ req: Request) async throws -> GetTrackingData {
@@ -99,6 +114,7 @@ struct AdminViewController: RouteCollection {
                 clubNight.eventName = updatedClubNight.eventName
                 clubNight.isActive = updatedClubNight.isActive
                 clubNight.totalGuests = updatedClubNight.totalGuests
+                clubNight.currentGuests = updatedClubNight.currentGuests ?? 0
                 
                 if updatedClubNight.isActive {
                     setAllOtherNightsToDisabled(req, id: updatedClubNight.id ?? UUID())
